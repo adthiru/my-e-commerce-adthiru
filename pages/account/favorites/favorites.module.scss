@@ -1,21 +1,38 @@
 .container {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  padding-left: 20px;
+  flex: 1;
+    padding: 20px 40px;
+  }
+  
   .title {
-    font-size: 28px;
-    margin: 0;
+  font-size: 24px;
+    margin: 0 0 30px;
   }
 
-  .content {
-    margin-top: 40px;
-
-    .products {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 40px;
-      padding-bottom: 30px;
+.content {
+  min-height: 300px;
+  }
+  
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+  
+    p {
+      color: #666;
+      margin-bottom: 20px;
     }
   }
+  
+  .link {
+    color: #000;
+    text-decoration: underline;
+    font-weight: 500;
+
+  &:hover {
+      text-decoration: none;
+    }
+  }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 25px;
 }

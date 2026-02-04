@@ -17,17 +17,15 @@ import ErrorPage from "pages/404";
 import { useRouter } from "next/router";
 
 export default function Product({ data, query }) {
-  if (!data.product_name) {
-    return <ErrorPage />;
-  }
-
   const [selectedSize, setSelectedSize] = useState();
   const [selectedPhoto, setSelectedPhoto] = useState(0);
   const [isFavorite, setFavorite] = useState(false);
 
   const { user, loading } = useAuth();
-
+  const { data: cart, loading: cartLoading } = useCart();
   const router = useRouter();
+
+  const id = query?.product;
 
   const {
     brand,
@@ -38,79 +36,85 @@ export default function Product({ data, query }) {
     product_name,
     sale_price,
     sizes,
-  } = data;
-
-  const id = query?.product;
+  } = data || {};
 
   useEffect(() => {
-    user && setFavorite(user.favorites.includes(id));
-  }, [user]);
+    if (user && user.favorites) {
+      setFavorite(user.favorites.includes(id));
+    }
+  }, [user, id]);
 
-  const removeEvent = (id) => {
-    removeFavorite(id);
+  const removeEvent = (productId) => {
+    removeFavorite(productId);
     setFavorite(false);
   };
-  const addEvent = (id) => {
-    addFavorite(id);
+
+  const addEvent = (productId) => {
+    addFavorite(productId);
     setFavorite(true);
   };
 
   const favoriteEvent = () => {
-    user
-      ? isFavorite
-        ? removeEvent(id)
-        : addEvent(id)
-      : typeof window !== "undefined" && router.push("/login");
-  };
-
-  const cart = useCart().data;
-
-  console.log(cart);
-
-  const addCartEvent = () => {
-    if (!user && !loading && typeof window !== "undefined")
+    if (user) {
+      isFavorite ? removeEvent(id) : addEvent(id);
+    } else if (typeof window !== "undefined") {
       router.push("/login");
-    else {
-      if (selectedSize) {
-        const newCart = {
-          ...cart,
-          [id]: cart.hasOwnProperty(id)
-            ? [...cart[id], selectedSize]
-            : [selectedSize],
-        };
-        addToCart(newCart);
-      }
-      if (sizes?.length === 0) {
-        const newCart = {
-          ...cart,
-          [id]: cart.hasOwnProperty(id) ? [...cart[id], "-"] : ["-"],
-        };
-        addToCart(newCart);
-      }
     }
   };
+
+  const addCartEvent = () => {
+    if (!user && !loading && typeof window !== "undefined") {
+      router.push("/login");
+      return;
+    }
+
+    if (cartLoading) return;
+
+    const currentCart = cart || {};
+
+    if (selectedSize) {
+      const newCart = {
+        ...currentCart,
+        [id]: currentCart.hasOwnProperty(id)
+          ? [...currentCart[id], selectedSize]
+          : [selectedSize],
+      };
+      addToCart(newCart);
+    } else if (!sizes || sizes.length === 0) {
+      const newCart = {
+        ...currentCart,
+        [id]: currentCart.hasOwnProperty(id) ? [...currentCart[id], "-"] : ["-"],
+      };
+      addToCart(newCart);
+    }
+  };
+
+  // Show error page if no product data
+  if (!product_name) {
+    return <ErrorPage />;
+  }
 
   return (
     <Layout>
       <div className={styles.container}>
         <Head>
-          <title>Create Next App</title>
+          <title>{product_name}</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
 
         <main className={styles.main}>
           <div className={styles.photosContainer}>
             <div className={styles.carouselContainer}>
-              <img src={photos[selectedPhoto]} loading="lazy" />
+              <img src={photos?.[selectedPhoto] || cover_photo} loading="lazy" />
             </div>
             <div className={styles.smallPhotos}>
-              {photos.slice(0, 5).map((image, index) => {
+              {photos?.slice(0, 5).map((image, index) => {
                 return (
                   <img
                     key={index}
                     src={image}
                     className={styles.smallPhoto}
-                    style={{ borderColor: selectedPhoto === index && "black" }}
+                    style={{ borderColor: selectedPhoto === index ? "black" : "" }}
                     onClick={() => setSelectedPhoto(index)}
                     loading="lazy"
                   />
@@ -121,36 +125,42 @@ export default function Product({ data, query }) {
           </div>
           <div className={styles.productInfos}>
             <div className={styles.header}>
-              <h1 className={styles.productTitle}>{product_name || ""}</h1>
-              <Link href={`/brand/${brand}`}>{brand || ""}</Link>
+              <h1 className={styles.productTitle}>{product_name}</h1>
+              <Link href={`/brand/${brand}`}>
+                <a>{brand || ""}</a>
+              </Link>
             </div>
             <span className={styles.priceText}>{price || 0}$</span>
-            <div className={styles.saleContainer}>
-              <span className={styles.saleText}>{sale_price || 0}$</span>
-              <span className={styles.savedText}>
-                {"(You will be saved " + (price - sale_price) + "$!)"}
-              </span>
-            </div>
+            {sale_price && (
+              <div className={styles.saleContainer}>
+                <span className={styles.saleText}>{sale_price}$</span>
+                <span className={styles.savedText}>
+                  (You will be saved {price - sale_price}$!)
+                </span>
+              </div>
+            )}
             <hr />
-            <div className={styles.sizes}>
-              <h4 className={styles.sizesText}>Sizes</h4>
-              {sizes.map((size) => {
-                return (
-                  <button
-                    key={size}
-                    className={styles.sizeButton}
-                    style={{
-                      borderColor: selectedSize === size && "black",
-                      fontWeight: selectedSize === size && "bold",
-                    }}
-                    onClick={() => setSelectedSize(size)}
-                  >
-                    {size}
-                  </button>
-                );
-              })}
-            </div>
-            <hr />
+            {sizes && sizes.length > 0 && (
+              <div className={styles.sizes}>
+                <h4 className={styles.sizesText}>Sizes</h4>
+                {sizes.map((size) => {
+                  return (
+                    <button
+                      key={size}
+                      className={styles.sizeButton}
+                      style={{
+                        borderColor: selectedSize === size ? "black" : "",
+                        fontWeight: selectedSize === size ? "bold" : "normal",
+                      }}
+                      onClick={() => setSelectedSize(size)}
+                    >
+                      {size}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+            {sizes && sizes.length > 0 && <hr />}
             <div className={styles.buttons}>
               <Button style={{ margin: 0 }} onClick={addCartEvent}>
                 Add to Cart

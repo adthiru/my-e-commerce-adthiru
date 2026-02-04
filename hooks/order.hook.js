@@ -32,6 +32,9 @@ const useOrders = () => {
                   setData(ordersArray);
                   setLoading(false);
                 });
+            } else {
+              setData([]);
+              setLoading(false);
             }
           });
     }
@@ -46,4 +49,46 @@ const useOrders = () => {
   };
 };
 
-export { useOrders };
+const useOrder = (orderId) => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!orderId) {
+      setLoading(false);
+      return;
+    }
+
+    async function fetchOrder() {
+      try {
+        const doc = await db.collection("Orders").doc(orderId).get();
+        if (doc.exists) {
+          const orderData = doc.data();
+          setData({
+            id: doc.id,
+            ...orderData,
+            date: orderData.date?.toDate(),
+            statusHistory: orderData.statusHistory?.map((h) => ({
+              ...h,
+              date: h.date?.toDate(),
+            })),
+            estimatedDelivery: orderData.estimatedDelivery?.toDate(),
+          });
+        } else {
+          setError("Order not found");
+        }
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    }
+
+    fetchOrder();
+  }, [orderId]);
+
+  return { data, loading, error };
+};
+
+export { useOrders, useOrder };

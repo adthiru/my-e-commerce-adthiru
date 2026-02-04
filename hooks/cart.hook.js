@@ -2,23 +2,37 @@ import { db, auth } from "@/config/firebase";
 import { useState, useEffect } from "react";
 
 const useCart = (id) => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    let unsubscribe;
+
     async function fetchFromFirestore() {
-      auth.currentUser &&
-        db
+      if (auth.currentUser) {
+        unsubscribe = db
           .collection("Users")
-          .doc(auth.currentUser?.uid)
+          .doc(auth.currentUser.uid)
           .onSnapshot(function (doc) {
-            setData(doc.data().cart);
+            const cartData = doc.data()?.cart;
+            setData(cartData || {});
+            setLoading(false);
+          }, (err) => {
+            setError(err);
+            setLoading(false);
           });
+      } else {
+        setLoading(false);
+      }
     }
 
     fetchFromFirestore();
-  }, [auth.currentUser]);
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, []);
 
   return {
     data,
@@ -28,26 +42,31 @@ const useCart = (id) => {
 };
 
 const useCartOnce = (id) => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  console.log("once");
 
   useEffect(() => {
     async function fetchFromFirestore() {
-      console.log("once inner");
-
-      db.collection("Users")
-        .doc(auth.currentUser?.uid)
-        .get()
-        .then(function (doc) {
-          setData(doc.data().cart);
-          setLoading(false);
-        })
-        .catch((e) => setError(e));
+      if (auth.currentUser?.uid) {
+        db.collection("Users")
+          .doc(auth.currentUser.uid)
+          .get()
+          .then(function (doc) {
+            setData(doc.data()?.cart || {});
+            setLoading(false);
+          })
+          .catch((e) => {
+            setError(e);
+            setLoading(false);
+          });
+      } else {
+        setLoading(false);
+      }
     }
-    auth.currentUser?.uid && fetchFromFirestore();
-  }, [auth.currentUser]);
+
+    fetchFromFirestore();
+  }, []);
 
   return {
     data,
