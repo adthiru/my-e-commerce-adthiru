@@ -3,9 +3,9 @@ import styles from "./cart.module.scss";
 
 import Layout from "components/Layout";
 import CartItem from "@/components/CartItem";
-import { useCart, useCartOnce } from "hooks/cart.hook";
-import React, { useEffect, useState } from "react";
-import { auth, db } from "@/config/firebase";
+import Button from "@/components/Button";
+import { useCart } from "hooks/cart.hook";
+import React from "react";
 import { useAuth } from "@/firebase/context";
 import { addToCart } from "@/firebase/product";
 import { useRouter } from "next/router";
@@ -13,8 +13,9 @@ import { useRouter } from "next/router";
 export default function CartPage() {
   const { user, loading } = useAuth();
   const { data } = useCart();
+  const router = useRouter();
 
-  const cartLength = Object.keys(data).reduce((a, b) => a + data[b].length, 0);
+  const cartLength = data ? Object.keys(data).reduce((a, b) => a + data[b].length, 0) : 0;
 
   const cartItems =
     cartLength > 0
@@ -51,19 +52,34 @@ export default function CartPage() {
   });
 
   const addCartEvent = (id, size) => {
+    const currentCart = data || {};
     const newCart = size
       ? {
-          ...data,
-          [id]: data.hasOwnProperty(id) ? [...data[id], size] : [size],
+          ...currentCart,
+          [id]: currentCart.hasOwnProperty(id) ? [...currentCart[id], size] : [size],
         }
       : {
-          ...data,
-          [id]: data.hasOwnProperty(id) ? [...data[id], "-"] : ["-"],
+          ...currentCart,
+          [id]: currentCart.hasOwnProperty(id) ? [...currentCart[id], "-"] : ["-"],
         };
     addToCart(newCart);
   };
 
-  const router = useRouter();
+  const removeCartEvent = (id, size) => {
+    if (!data || !data[id]) return;
+
+    const sizes = [...data[id]];
+    const sizeToRemove = size || "-";
+    const indexToRemove = sizes.indexOf(sizeToRemove);
+
+    if (indexToRemove > -1) {
+      sizes.splice(indexToRemove, 1);
+      const newCart = sizes.length > 0
+        ? { ...data, [id]: sizes }
+        : Object.fromEntries(Object.entries(data).filter(([key]) => key !== id));
+      addToCart(newCart);
+    }
+  };
 
   if (!loading && !user && typeof window !== "undefined") router.push("/login");
 
@@ -71,7 +87,7 @@ export default function CartPage() {
     <Layout>
       <div className={styles.container}>
         <Head>
-          <title>Create Next App</title>
+          <title>My Cart</title>
           <link rel="icon" href="/favicon.ico" />
         </Head>
 
@@ -80,17 +96,32 @@ export default function CartPage() {
             <h1 className={styles.title}>My Cart</h1>
             <h4>You have {cartLength} items in your cart</h4>
           </div>
-          {cartItemsArray.map((item, index) => {
-            return (
-              <CartItem
-                key={index}
-                id={item.name}
-                size={item.size}
-                count={item.count}
-                onAdd={addCartEvent}
-              />
-            );
-          })}
+          {cartItemsArray.length === 0 ? (
+            <div className={styles.emptyCart}>
+              <p>Your cart is empty</p>
+              <Button onClick={() => router.push("/")}>Continue Shopping</Button>
+            </div>
+          ) : (
+            <>
+              {cartItemsArray.map((item, index) => {
+                return (
+                  <CartItem
+                    key={index}
+                    id={item.name}
+                    size={item.size}
+                    count={item.count}
+                    onAdd={addCartEvent}
+                    onRemove={removeCartEvent}
+                  />
+                );
+              })}
+              <div className={styles.checkoutSection}>
+                <Button onClick={() => router.push("/checkout")}>
+                  Proceed to Checkout
+                </Button>
+              </div>
+            </>
+          )}
         </main>
       </div>
     </Layout>

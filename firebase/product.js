@@ -30,4 +30,12 @@ function addToCart(newCart) {
   });
 }
 
-export { addFavorite, removeFavorite, addToCart };
+function clearCart() {
+  const currentUser = auth.currentUser.uid;
+
+  return db.collection("Users").doc(currentUser).update({
+    cart: {},
+  });
+}
+
+export { addFavorite, removeFavorite, addToCart, clearCart };

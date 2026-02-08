@@ -26,5 +26,22 @@
         font-weight: bold;
       }
     }
+.emptyCart {
+  text-align: center;
+  padding: 60px 20px;
+
+  p {
+    color: #666;
+    margin-bottom: 20px;
+  }
+}
+
+.checkoutSection {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+}
   }
 }

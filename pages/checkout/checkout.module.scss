@@ -1,0 +1,255 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.steps {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 40px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+
+  .step {
+    color: #999;
+    font-weight: 500;
+    position: relative;
+
+    &.active {
+      color: #000;
+    }
+
+    &.active::after {
+      content: "";
+      position: absolute;
+      bottom: -21px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #000;
+    }
+  }
+}
+
+.content {
+  display: flex;
+  gap: 40px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+}
+
+.main {
+  flex: 1;
+}
+
+.section {
+  h2 {
+    margin-bottom: 20px;
+    font-size: 20px;
+  }
+}
+
+.addressList {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.addressCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  padding: 20px;
+  border: 2px solid #eee;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+
+  &:hover {
+    border-color: #ccc;
+  }
+
+  &.selected {
+    border-color: #000;
+  }
+
+  input[type="radio"] {
+    margin-top: 4px;
+  }
+
+  strong {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+  }
+}
+
+.paymentForm {
+  max-width: 500px;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: #000;
+    }
+  }
+}
+
+.formRow {
+  display: flex;
+  gap: 20px;
+
+  .formGroup {
+    flex: 1;
+  }
+}
+
+.error {
+  display: block;
+  color: #e74c3c;
+  font-size: 13px;
+  margin-top: 5px;
+}
+
+.reviewSection {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+
+  h3 {
+    margin-bottom: 15px;
+    font-size: 16px;
+    color: #666;
+  }
+}
+
+.reviewAddress {
+  strong {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  p {
+    margin: 0;
+    color: #666;
+  }
+}
+
+.reviewItem {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 10px 0;
+
+  img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+
+  div {
+    flex: 1;
+
+    p {
+      margin: 0;
+      &:first-child {
+        font-weight: 500;
+      }
+      &:last-child {
+        font-size: 13px;
+        color: #666;
+      }
+    }
+  }
+
+  span {
+    font-weight: 500;
+  }
+}
+
+.navigation {
+  display: flex;
+  gap: 15px;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.summary {
+  width: 350px;
+  padding: 25px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+
+  h3 {
+    margin: 0 0 20px;
+    font-size: 18px;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid #ddd;
+    margin: 15px 0;
+  }
+}
+
+.summaryItems {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.summaryItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 14px;
+
+  span:first-child {
+    color: #666;
+  }
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+
+  &.total {
+    font-size: 18px;
+    font-weight: 600;
+  }
+}
