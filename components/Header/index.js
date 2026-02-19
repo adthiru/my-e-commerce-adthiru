@@ -65,7 +65,7 @@ export default function Header() {
           ) : (
             <>
               <Link href="/login">Login</Link>
-              <Link href="/login">Register</Link>
+              <Link href="/login?tab=register">Register</Link>
             </>
           )}
         </div>
@@ -133,7 +133,7 @@ export default function Header() {
                 ) : (
                   <>
                     <Link href="/login">Login</Link>
-                    <Link href="/login">Register</Link>
+                    <Link href="/login?tab=register">Register</Link>
                   </>
                 )}
               </div>

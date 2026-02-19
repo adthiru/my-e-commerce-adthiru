@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 
 import styles from "./login.module.scss";
@@ -7,16 +7,17 @@ import RegisterForm from "./register-form";
 import { auth } from "../../config/firebase";
 
 export default function LoginPage() {
-  const [page, setPage] = useState("login");
-
   const router = useRouter();
+  const [page, setPage] = useState(router.query.tab === "register" ? "register" : "login");
 
-  auth.onAuthStateChanged(function (user) {
-    if (user) {
-      console.log(user);
-      typeof window !== "undefined" && router.push("/");
-    }
-  });
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(function (user) {
+      if (user) {
+        router.push("/");
+      }
+    });
+    return () => unsubscribe();
+  }, [router]);
 
   return (
     <div className={styles.container}>
