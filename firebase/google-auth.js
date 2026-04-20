@@ -1,9 +1,12 @@
 import { firebase, auth, db } from "../config/firebase";
+import { setTokenCookie } from "./cookie";
 
 export default function googleAuth() {
   auth
     .signInWithPopup(new firebase.auth.GoogleAuthProvider())
-    .then(function (result) {
+    .then(async function (result) {
+      const token = await result.user.getIdToken();
+      setTokenCookie(token);
       db.collection("Users")
         .doc(result.user.uid)
         .get()

@@ -1,6 +1,7 @@
 import React from "react";
 
 import { auth } from "@/config/firebase";
+import { clearTokenCookie } from "firebase/cookie";
 import { useRouter } from "next/router";
 
 export default function Logout() {
@@ -8,6 +9,9 @@ export default function Logout() {
 
   auth
     .signOut()
-    .finally(() => typeof window !== "undefined" && router.push("/login"));
+    .finally(() => {
+      clearTokenCookie();
+      if (typeof window !== "undefined") router.push("/login");
+    });
   return <div></div>;
 }

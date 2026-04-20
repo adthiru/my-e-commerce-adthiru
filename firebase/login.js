@@ -1,5 +1,9 @@
 import { auth } from "../config/firebase";
+import { setTokenCookie } from "./cookie";
 
-export default function emailLogin({ email, password }) {
-  return auth.signInWithEmailAndPassword(email, password);
+export default async function emailLogin({ email, password }) {
+  const result = await auth.signInWithEmailAndPassword(email, password);
+  const token = await result.user.getIdToken();
+  setTokenCookie(token);
+  return result;
 }

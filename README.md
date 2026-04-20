@@ -5,18 +5,12 @@
   </a>
 
   <h3 align="center">E-Commerce Website</h3>
-  
-  <h4 align="center">Demo: <a href="https://next-e-commerce-example.vercel.app/">https://next-e-commerce-example.vercel.app/</a></h4>
 
   <p align="center">
-    An e-commerce website example built with Next.js that I made in 1 week as a self challenge. There are some issues that I will handle later. Using Firebase as backend.
+    A forked Next.js e-commerce demo used as a testing platform for the QualityAssuranceAIAgent. Uses Firebase as a backend.
     <br />
     <br />
-    <a href="https://twitter.com/anilsenay">Contact me</a>
-    ·
-    <a href="https://github.com/anilsenay/next-e-commerce/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/anilsenay/next-e-commerce/issues">Request Feature</a>
+    Original project: <a href="https://github.com/anilsenay/next-e-commerce">anilsenay/next-e-commerce</a>
   </p>
 </p>
 
