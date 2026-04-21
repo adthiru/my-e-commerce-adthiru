@@ -1,16 +1,13 @@
 import React, { useState, useEffect, useContext, createContext } from "react";
-import { firebase, auth, db } from "../config/firebase";
-import { readTokenCookie, decodeTokenPayload, setTokenCookie, clearTokenCookie } from "./cookie";
+import { firebase, db } from "../config/firebase";
 
 const authContext = createContext();
 export function AuthProvider({ children }) {
   const auth = useProvideAuth();
   return <authContext.Provider value={auth}>{children}</authContext.Provider>;
 }
-export const useAuth = () => {
-  console.log("useAuth");
-  return useContext(authContext);
-};
+export const useAuth = () => useContext(authContext);
+
 function useProvideAuth() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -27,33 +24,31 @@ function useProvideAuth() {
       .catch(() => setLoading(false));
 
   useEffect(() => {
-    // Cookie-first path: if a fb_token cookie exists (e.g. replayed by an agent
-    // with no IndexedDB), trust its uid claim and load the user doc directly.
-    const token = readTokenCookie();
-    const payload = token ? decodeTokenPayload(token) : null;
-    const cookieUid = payload?.user_id || payload?.sub;
-    if (cookieUid) {
-      loadUserDoc(cookieUid);
-    }
+    // Session-cookie path: __session is HttpOnly/opaque, so ask the server who it belongs to.
+    // Covers agent runs (cookie-only, no IndexedDB) and returning human users.
+    fetch("/api/session-verify")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.uid) loadUserDoc(data.uid);
+        else setLoading(false);
+      })
+      .catch(() => setLoading(false));
 
-    // Firebase SDK path: runs for normal users whose IndexedDB is intact, and
-    // keeps the cookie in sync as the ID token rotates (~hourly).
+    // SDK path for humans: re-mint session cookie as the 1h ID token rotates,
+    // extending the 14-day window transparently.
     const unsubscribe = firebase.auth().onIdTokenChanged(async (fbUser) => {
       if (fbUser) {
-        const fresh = await fbUser.getIdToken();
-        setTokenCookie(fresh);
+        const idToken = await fbUser.getIdToken();
+        fetch("/api/session-login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ idToken }),
+        });
         loadUserDoc(fbUser.uid);
-      } else if (!cookieUid) {
-        clearTokenCookie();
-        setLoading(false);
       }
     });
     return () => unsubscribe();
   }, []);
 
-  return {
-    user,
-    loading,
-    setUser,
-  };
+  return { user, loading, setUser };
 }

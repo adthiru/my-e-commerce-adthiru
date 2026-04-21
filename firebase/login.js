@@ -1,9 +1,12 @@
 import { auth } from "../config/firebase";
-import { setTokenCookie } from "./cookie";
 
 export default async function emailLogin({ email, password }) {
   const result = await auth.signInWithEmailAndPassword(email, password);
-  const token = await result.user.getIdToken();
-  setTokenCookie(token);
+  const idToken = await result.user.getIdToken();
+  await fetch("/api/session-login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ idToken }),
+  });
   return result;
 }

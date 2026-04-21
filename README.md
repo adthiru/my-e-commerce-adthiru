@@ -112,6 +112,11 @@ npm install
 NEXT_PUBLIC_FIREBASE_API_KEY = your-firebase-api-key
 NEXT_PUBLIC_FIREBASE_PROJECT_ID = your-firebase-project-id
 NEXT_PUBLIC_FIREBASE_APP_ID = your-firebase-app-id
+
+# Server-only. Firebase Console -> Project settings -> Service accounts ->
+# Generate new private key. Paste the entire JSON as a single-line string.
+# Used by pages/api/session-* to mint/verify 14-day __session cookies.
+FIREBASE_ADMIN_CREDENTIALS = '{"type":"service_account", ... }'
 ```
 
 5. Run in development mode
